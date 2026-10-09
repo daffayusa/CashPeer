@@ -14,7 +14,7 @@ fun AppNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = AppRoute.TRANSACTION
+        startDestination = AppRoute.ADD_TRANSACTION
     ){
         composable(AppRoute.TRANSACTION){
             TransactionListScreen(
@@ -25,6 +25,9 @@ fun AppNavGraph(
         }
         composable(AppRoute.ADD_TRANSACTION) {
             AddTransactionScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
                 onSuccess = {
                     navController.popBackStack()
                 }

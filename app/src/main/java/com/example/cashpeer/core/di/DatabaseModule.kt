@@ -3,6 +3,8 @@ package com.example.cashpeer.core.di
 import android.content.Context
 import androidx.room3.Room
 import com.example.cashpeer.core.database.AppDatabase
+import com.example.cashpeer.core.database.MIGRATION_1_2
+import com.example.cashpeer.feature.category.data.local.CategoryDao
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -23,7 +25,9 @@ object DatabaseModule {
             contex,
             AppDatabase::class.java,
             "cashpeer_database"
-        ).build()
+        )
+            .addMigrations(MIGRATION_1_2)
+            .build()
     }
 
     @Provides
@@ -32,4 +36,9 @@ object DatabaseModule {
     ): TransactionDao{
         return database.transactionDao()
     }
+
+    @Provides
+    fun provideCategoryDao(
+        database: AppDatabase
+    ): CategoryDao = database.categoryDao()
 }
