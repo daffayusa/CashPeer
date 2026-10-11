@@ -97,14 +97,14 @@ fun AddTransactionScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                //.verticalScroll(rememberScrollState())
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 18.dp, vertical = 12.dp)
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 elevation = CardDefaults.cardElevation(
                     defaultElevation = 3.dp

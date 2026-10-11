@@ -7,6 +7,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.example.cashpeer.feature.category.data.local.CategoryDao
 import com.example.cashpeer.feature.category.data.local.CategoryEntity
+import com.example.cashpeer.feature.savinggoal.data.local.SavingGoalEntity
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
 import com.example.cashpeer.feature.transaction.data.local.TransactionEntity
 
@@ -28,7 +29,8 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 @Database(
     entities = [
         TransactionEntity::class,
-        CategoryEntity::class
+        CategoryEntity::class,
+        SavingGoalEntity::class
     ],
     version = 2,
     exportSchema = true

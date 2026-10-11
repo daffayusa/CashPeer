@@ -173,13 +173,23 @@ class AddTransactionViewModel @Inject constructor(
                     note = state.note.ifBlank { null }
                 )
 
-                addTransactionUseCase(transaction)
+                val result = addTransactionUseCase(transaction)
 
-                _uiState.value = _uiState.value.copy(
-                    isSaving = false
+                result.fold(
+                    onSuccess={
+                        _uiState.value = _uiState.value.copy(
+                            isSaving = false
+                        )
+                        onSuccess()
+                    },
+                    onFailure = { e->
+                        _uiState.value = _uiState.value.copy(
+                            isSaving = false,
+                            error = e.message ?: "Gagal menyimpan transaksi"
+                        )
+                    }
                 )
 
-                onSuccess()
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
