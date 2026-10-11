@@ -13,9 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.cashpeer.core.navigation.AppNavigation
+import com.example.cashpeer.core.ui.theme.CashPeerTheme
 import com.example.cashpeer.feature.transaction.presentation.add.AddTransactionScreen
 import com.example.cashpeer.feature.transaction.presentation.list.TransactionListScreen
-import com.example.cashpeer.ui.theme.CashPeerTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

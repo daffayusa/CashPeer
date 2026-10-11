@@ -1,6 +1,7 @@
 package com.example.cashpeer.feature.transaction.data.repository
 
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
+import com.example.cashpeer.feature.category.data.mapper.toDomain
 import com.example.cashpeer.feature.transaction.data.mapper.toDomain
 import com.example.cashpeer.feature.transaction.data.mapper.toEntity
 import com.example.cashpeer.feature.transaction.domain.model.Transaction

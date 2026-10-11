@@ -1,58 +1,57 @@
-package com.example.cashpeer.ui.theme
+package com.example.cashpeer.core.ui.theme
 
-import android.app.Activity
-import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import com.example.cashpeer.ui.theme.BackgroundLight
+import com.example.cashpeer.ui.theme.Error
+import com.example.cashpeer.ui.theme.GreenContainer
+import com.example.cashpeer.ui.theme.GreenDark
+import com.example.cashpeer.ui.theme.GreenLight
+import com.example.cashpeer.ui.theme.GreenPrimary
+import com.example.cashpeer.ui.theme.Outline
+import com.example.cashpeer.ui.theme.OutlineLight
+import com.example.cashpeer.ui.theme.SurfaceVariantLight
+import com.example.cashpeer.ui.theme.SurfaceWhite
+import com.example.cashpeer.ui.theme.TextOnPrimary
+import com.example.cashpeer.ui.theme.TextPrimary
+import com.example.cashpeer.ui.theme.TextSecondary
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
-)
+private val CashPeerLightColorScheme = lightColorScheme(
+    primary = GreenPrimary,
+    onPrimary = TextOnPrimary,
+    primaryContainer = GreenContainer,
+    onPrimaryContainer = GreenDark,
 
-private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    secondary = GreenDark,
+    onSecondary = TextOnPrimary,
+    secondaryContainer = GreenLight,
+    onSecondaryContainer = GreenDark,
 
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    background = BackgroundLight,
+    onBackground = TextPrimary,
+
+    surface = SurfaceWhite,
+    onSurface = TextPrimary,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = TextSecondary,
+
+    outline = Outline,
+    outlineVariant = OutlineLight,
+
+    error = Error,
+    onError = Color.White
+
 )
 
 @Composable
 fun CashPeerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
+        colorScheme = CashPeerLightColorScheme,
+        typography = CashPeerTypography,
         content = content
     )
 }
