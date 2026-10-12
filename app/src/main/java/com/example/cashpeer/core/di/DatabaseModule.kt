@@ -5,6 +5,7 @@ import androidx.room3.Room
 import com.example.cashpeer.core.database.AppDatabase
 import com.example.cashpeer.core.database.MIGRATION_1_2
 import com.example.cashpeer.feature.category.data.local.CategoryDao
+import com.example.cashpeer.feature.savinggoal.data.local.SavingGoalDao
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -41,4 +42,12 @@ object DatabaseModule {
     fun provideCategoryDao(
         database: AppDatabase
     ): CategoryDao = database.categoryDao()
+
+
+    @Provides
+    fun provideSavingGoalDao(
+        database: AppDatabase
+    ): SavingGoalDao {
+        return database.savingGoalDao()
+    }
 }

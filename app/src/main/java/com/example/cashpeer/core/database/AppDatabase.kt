@@ -7,6 +7,7 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import com.example.cashpeer.feature.category.data.local.CategoryDao
 import com.example.cashpeer.feature.category.data.local.CategoryEntity
+import com.example.cashpeer.feature.savinggoal.data.local.SavingGoalDao
 import com.example.cashpeer.feature.savinggoal.data.local.SavingGoalEntity
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
 import com.example.cashpeer.feature.transaction.data.local.TransactionEntity
@@ -37,5 +38,6 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
+    abstract fun savingGoalDao(): SavingGoalDao
     abstract fun categoryDao(): CategoryDao
 }
