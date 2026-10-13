@@ -26,6 +26,23 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         )
     }
 }
+val MIGRATION_2_3 = object : Migration(2, 3) {
+    override suspend fun migrate(connection: SQLiteConnection) {
+        connection.execSQL(
+            """
+            ALTER TABLE `saving_goals`
+            ADD COLUMN `saving_frequency` TEXT NOT NULL DEFAULT 'DAILY'
+            """.trimIndent()
+        )
+
+        connection.execSQL(
+            """
+            ALTER TABLE `saving_goals`
+            ADD COLUMN `saving_amount` INTEGER NOT NULL DEFAULT 0
+            """.trimIndent()
+        )
+    }
+}
 
 @Database(
     entities = [
@@ -33,7 +50,7 @@ val MIGRATION_1_2 = object : Migration(1, 2) {
         CategoryEntity::class,
         SavingGoalEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 abstract class AppDatabase : RoomDatabase() {

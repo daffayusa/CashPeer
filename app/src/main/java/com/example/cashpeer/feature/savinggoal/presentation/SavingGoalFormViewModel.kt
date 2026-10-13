@@ -2,6 +2,7 @@ package com.example.cashpeer.feature.savinggoal.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cashpeer.feature.savinggoal.domain.model.SavingFrequency
 import com.example.cashpeer.feature.savinggoal.domain.model.SavingGoal
 import com.example.cashpeer.feature.savinggoal.domain.usecase.AddSavingGoalUseCase
 import com.example.cashpeer.feature.savinggoal.domain.usecase.GetSavingGoalByIdUseCase
@@ -61,6 +62,8 @@ class SavingGoalFormViewModel @Inject constructor(
                         targetDate = goal.targetDate?.toString(),
                         note = goal.note.orEmpty(),
                         isLoading = false,
+                        savingFrequency = goal.savingFrequency,
+                        savingAmount = goal.savingAmount.toString(),
                         error = null
                     )
                 }
@@ -99,6 +102,7 @@ class SavingGoalFormViewModel @Inject constructor(
 
     fun save() {
         val current = _uiState.value
+        val savingAmount = current.savingAmount.toLongOrNull()
 
         if (current.isSaving || current.isLoading || current.isSaved) return
 
@@ -114,6 +118,12 @@ class SavingGoalFormViewModel @Inject constructor(
             name.isBlank() -> {
                 _uiState.update {
                     it.copy(error = "Nama target tabungan wajib diisi.")
+                }
+                return
+            }
+            savingAmount == null || savingAmount <= 0L -> {
+                _uiState.update {
+                    it.copy(error = "Nominal menabung harus lebih dari 0.")
                 }
                 return
             }
@@ -143,6 +153,8 @@ class SavingGoalFormViewModel @Inject constructor(
                     name = name,
                     targetAmount = amount,
                     targetDate = targetDate,
+                    savingFrequency = current.savingFrequency,
+                    savingAmount = savingAmount,
                     note = current.note.trim().ifBlank { null }
                 )
 
@@ -177,6 +189,19 @@ class SavingGoalFormViewModel @Inject constructor(
                         error = e.message ?: "Terjadi kesalahan saat menyimpan."
                     )
                 }
+            }
+        }
+    }
+    fun onSavingFrequencyChange(value: SavingFrequency) {
+        _uiState.update {
+            it.copy(savingFrequency = value, error = null)
+        }
+    }
+
+    fun onSavingAmountChange(value: String) {
+        if (value.isEmpty() || value.all(Char::isDigit)) {
+            _uiState.update {
+                it.copy(savingAmount = value, error = null)
             }
         }
     }

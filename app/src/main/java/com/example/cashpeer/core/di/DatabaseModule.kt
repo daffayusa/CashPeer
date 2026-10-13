@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room3.Room
 import com.example.cashpeer.core.database.AppDatabase
 import com.example.cashpeer.core.database.MIGRATION_1_2
+import com.example.cashpeer.core.database.MIGRATION_2_3
 import com.example.cashpeer.feature.category.data.local.CategoryDao
 import com.example.cashpeer.feature.savinggoal.data.local.SavingGoalDao
 import com.example.cashpeer.feature.transaction.data.local.TransactionDao
@@ -27,7 +28,10 @@ object DatabaseModule {
             AppDatabase::class.java,
             "cashpeer_database"
         )
-            .addMigrations(MIGRATION_1_2)
+            .addMigrations(
+                MIGRATION_1_2,
+                MIGRATION_2_3
+            )
             .build()
     }
 

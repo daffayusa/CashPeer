@@ -29,6 +29,18 @@ data class SavingGoalEntity(
 
     val note: String? = null,
 
+    @ColumnInfo(
+        name = "saving_frequency",
+        defaultValue = "'DAILY'"
+    )
+    val savingFrequency: String = "DAILY",
+
+    @ColumnInfo(
+        name = "saving_amount",
+        defaultValue = "0"
+    )
+    val savingAmount: Long = 0L,
+
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis()
 )

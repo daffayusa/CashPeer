@@ -9,5 +9,7 @@ data class SavingGoal(
     val targetAmount: Long,
     val targetDate: LocalDate?,
     val note: String? = null,
+    val savingFrequency: SavingFrequency = SavingFrequency.DAILY,
+    val savingAmount: Long = 0L,
     val createdAt: Long = System.currentTimeMillis()
 )
