@@ -1,8 +1,7 @@
 package com.example.cashpeer
 
 import android.annotation.SuppressLint
-import android.os.Bundle
-import androidx.activity.ComponentActivity
+
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,22 +17,22 @@ import com.example.cashpeer.feature.transaction.presentation.add.AddTransactionS
 import com.example.cashpeer.feature.transaction.presentation.list.TransactionListScreen
 import dagger.hilt.android.AndroidEntryPoint
 
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import com.example.cashpeer.core.ui.theme.CashPeerTheme
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
 
         setContent {
             CashPeerTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    AppNavigation()
-                }
+                AppNavigation()
             }
         }
     }
