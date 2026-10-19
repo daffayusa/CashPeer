@@ -3,6 +3,7 @@ package com.example.cashpeer.feature.home.presentation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Laptop
 import androidx.compose.material.icons.filled.NotificationsNone
@@ -22,6 +24,10 @@ import androidx.compose.material.icons.filled.ShoppingBag
 import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,8 +55,11 @@ fun HomeScreen(
     onViewSavingGoals: () -> Unit,
     onNotificationClick: () -> Unit = {},
     onSavingGoalClick: (Long) -> Unit = {},
-    onMonthClick: () -> Unit = {}
+    onMonthClick: () -> Unit = {},
+    onPreviousMonth: () -> Unit = {},
+    onNextMonth: () -> Unit = {}
 ) {
+    var showMonthDialog by remember { mutableStateOf(false) }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -84,7 +93,7 @@ fun HomeScreen(
                 income = uiState.monthlyIncome,
                 expense = uiState.monthlyExpense,
                 balance = uiState.totalBalance,
-                onMonthClick = onMonthClick
+                onMonthClick = {showMonthDialog = true}
             )
         }
 
@@ -106,6 +115,55 @@ fun HomeScreen(
         item {
             AddTransactionButton(onClick = onAddTransaction)
         }
+    }
+    if(showMonthDialog){
+        AlertDialog(
+            onDismissRequest = {
+                showMonthDialog = false
+            },
+            title = {
+                Text(text = "Pilih bulan")
+            },
+            text ={
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    IconButton(
+                        onClick = onPreviousMonth
+                    ) {
+                        Icon(
+                            Icons.Default.ChevronLeft,
+                            contentDescription = "Bulan sebelumnya"
+                        )
+                    }
+
+                    Text(
+                        uiState.monthLabel.ifBlank { "Bulan ini" },
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    IconButton(
+                        onClick = onNextMonth
+                    ) {
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = "Bulan berikutnya"
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showMonthDialog = false
+                    }
+                ) {
+                    Text("Selesai")
+                }
+            }
+        )
     }
 }
 
@@ -592,8 +650,8 @@ private fun RecentTransactionRow(
 
     val amountPrefix = when (transaction.type) {
         HomeTransactionType.INCOME -> "+ "
-        HomeTransactionType.EXPENSE,
-        HomeTransactionType.SAVING -> "- "
+        HomeTransactionType.EXPENSE -> "- "
+        HomeTransactionType.SAVING -> ""
     }
 
     val iconBackground = when (transaction.type) {
@@ -630,16 +688,19 @@ private fun RecentTransactionRow(
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                transaction.title.ifBlank { transaction.categoryName },
+                text = transaction.title,
                 fontWeight = FontWeight.Medium,
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
+
             Text(
-                transaction.dateLabel,
+                text = "${transaction.categoryName} • ${transaction.dateLabel}",
                 color = HomeMutedText,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 

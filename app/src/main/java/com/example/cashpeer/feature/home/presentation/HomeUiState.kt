@@ -35,7 +35,8 @@ data class HomeTransactionUi(
     val categoryName: String,
     val dateLabel: String,
     val amount: Long,
-    val type: HomeTransactionType
+    val type: HomeTransactionType,
+    val savingGoalId: Long? = null
 )
 
 enum class HomeTransactionType {

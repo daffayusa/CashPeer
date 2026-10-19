@@ -2,6 +2,8 @@ package com.example.cashpeer.feature.home.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cashpeer.feature.category.domain.repository.CategoryRepository
+import com.example.cashpeer.feature.savinggoal.domain.model.estimateCompletionDate
 import com.example.cashpeer.feature.transaction.domain.model.TransactionType
 import com.example.cashpeer.feature.transaction.domain.repository.TransactionRepository
 import com.example.cashpeer.feature.savinggoal.domain.repository.SavingGoalRepository
@@ -26,7 +28,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
-    private val savingGoalRepository: SavingGoalRepository
+    private val savingGoalRepository: SavingGoalRepository,
+    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     private val userId = 1L
@@ -57,12 +60,28 @@ class HomeViewModel @Inject constructor(
                             savingGoalRepository
                                 .observeSavedAmount(userId, goal.id)
                                 .map { savedAmount ->
+                                    val estimatedDate = if (savedAmount >= goal.targetAmount) {
+                                        null
+                                    } else {
+                                        estimateCompletionDate(
+                                            targetAmount = goal.targetAmount,
+                                            savedAmount = savedAmount,
+                                            savingAmount = goal.savingAmount,
+                                            frequency = goal.savingFrequency
+                                        )
+                                    }
+
                                     HomeSavingGoalUi(
                                         id = goal.id,
                                         name = goal.name,
                                         savedAmount = savedAmount,
                                         targetAmount = goal.targetAmount,
-                                        estimatedCompletion = null
+                                        estimatedCompletion = estimatedDate?.format(
+                                            DateTimeFormatter.ofPattern(
+                                                "dd MMM yyyy",
+                                                Locale("id", "ID")
+                                            )
+                                        )
                                     )
                                 }
                         }
@@ -88,6 +107,16 @@ class HomeViewModel @Inject constructor(
                 Triple(month, income, expense)
             }
         }
+        val incomeCategories = categoryRepository.observeCategories(userId, TransactionType.INCOME)
+        val expenseCategories = categoryRepository.observeCategories(userId, TransactionType.EXPENSE)
+        val categoryNames = combine(
+            incomeCategories,
+            expenseCategories
+        ){income, expense ->
+            (income+expense).associate { category ->
+                category.id to category.name
+            }
+        }
 
         viewModelScope.launch {
             combine(
@@ -96,7 +125,8 @@ class HomeViewModel @Inject constructor(
                 transactionRepository.observeTotalSaving(userId),
                 monthlySummary,
                 transactionRepository.observeRecentTransactions(userId, 4),
-                goalsWithProgress
+                goalsWithProgress,
+                categoryNames
             ) { values ->
                 @Suppress("UNCHECKED_CAST")
                 val income = values[0] as Long
@@ -105,6 +135,7 @@ class HomeViewModel @Inject constructor(
                 val monthly = values[3] as Triple<YearMonth, Long, Long>
                 val transactions = values[4] as List<com.example.cashpeer.feature.transaction.domain.model.Transaction>
                 val goals = values[5] as List<HomeSavingGoalUi>
+                val categories = values[6] as Map<Long, String>
 
                 HomeUiState(
                     totalBalance = income - expense - saving,
@@ -117,11 +148,24 @@ class HomeViewModel @Inject constructor(
                         )
                     ),
                     recentTransactions = transactions.map { transaction ->
+                        val savingGoalName = goals
+                            .firstOrNull { it.id == transaction.savingGoalId }
+                            ?.name
+
+                        val categoryName = when (transaction.type) {
+                            TransactionType.SAVING ->
+                                savingGoalName ?: "Tabungan"
+
+                            TransactionType.INCOME,
+                            TransactionType.EXPENSE ->
+                                transaction.categoryId?.let { categories[it] }
+                                    ?: "Transaksi"
+                        }
+
                         HomeTransactionUi(
                             id = transaction.id,
-                            title = transaction.note.orEmpty()
-                                .ifBlank { "Transaksi" },
-                            categoryName = "Transaksi",
+                            title = transaction.note.orEmpty().ifBlank { categoryName },
+                            categoryName = categoryName,
                             dateLabel = transaction.transactionDate.format(
                                 DateTimeFormatter.ofPattern(
                                     "dd MMMM yyyy",
@@ -130,13 +174,11 @@ class HomeViewModel @Inject constructor(
                             ),
                             amount = transaction.amount,
                             type = when (transaction.type) {
-                                TransactionType.INCOME ->
-                                    HomeTransactionType.INCOME
-                                TransactionType.EXPENSE ->
-                                    HomeTransactionType.EXPENSE
-                                TransactionType.SAVING ->
-                                    HomeTransactionType.SAVING
-                            }
+                                TransactionType.INCOME -> HomeTransactionType.INCOME
+                                TransactionType.EXPENSE -> HomeTransactionType.EXPENSE
+                                TransactionType.SAVING -> HomeTransactionType.SAVING
+                            },
+                            savingGoalId = transaction.savingGoalId
                         )
                     },
                     savingGoals = goals,

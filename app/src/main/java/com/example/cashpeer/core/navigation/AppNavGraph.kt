@@ -47,9 +47,14 @@ fun AppNavGraph(
                 onSavingGoalClick = { goalId ->
                     navController.navigate(AppRoute.editSavingGoal(goalId))
                 },
-                onMonthClick = {
+                onMonthClick = {},
+                onPreviousMonth = {
                     viewModel.previousMonth()
+                },
+                onNextMonth = {
+                    viewModel.nextMonth()
                 }
+
             )
         }
 
