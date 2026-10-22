@@ -65,7 +65,7 @@ fun AddTransactionScreen(
     val selectedTypeIndex = when (state.type) {
         TransactionType.INCOME -> 0
         TransactionType.EXPENSE -> 1
-        TransactionType.SAVING -> 1
+        TransactionType.SAVING -> 2
     }
 
     Scaffold(
@@ -115,25 +115,24 @@ fun AddTransactionScreen(
                     verticalArrangement = Arrangement.spacedBy(22.dp)
                 ) {
 
-                    // Tipe transaksi
                     CpSegmentedButton(
                         options = listOf(
                             "Penghasilan",
-                            "Pengeluaran"
+                            "Pengeluaran",
+                            "Tabungan"
                         ),
                         selectedIndex = selectedTypeIndex,
                         onSelected = { index ->
                             viewModel.setType(
-                                if (index == 0) {
-                                    TransactionType.INCOME
-                                } else {
-                                    TransactionType.EXPENSE
+                                when(index){
+                                    0 -> TransactionType.INCOME
+                                    1 -> TransactionType.EXPENSE
+                                    else -> TransactionType.SAVING
                                 }
                             )
                         }
                     )
 
-                    // Nominal
                     CpTextField(
                         value = state.amount,
                         onValueChange = viewModel::setAmount,
@@ -142,34 +141,51 @@ fun AddTransactionScreen(
                         keyboardType = KeyboardType.Number
                     )
 
-                    // Kategori
-                    val selectedCategory = state.categories
-                        .firstOrNull { it.id == state.categoryId }
 
-                    CpDropdown(
-                        label = "Kategori",
-                        options = state.categories.map { it.name },
-                        selectedOption = selectedCategory?.name,
-                        enabled = !state.isLoadingCategories,
-                        placeholder = when {
-                            state.isLoadingCategories -> "Memuat kategori..."
-                            state.categories.isEmpty() -> "Belum ada kategori"
-                            else -> "Pilih kategori"
-                        },
-                        onOptionSelected = { index ->
-                            state.categories.getOrNull(index)?.let {
-                                viewModel.setCategoryId(it.id)
+                    if (state.type == TransactionType.SAVING){
+                        val selectedGoal = state.savingGoals.firstOrNull{it.id == state.savingGoalId}
+                        CpDropdown(
+                            label = "Target Tabungan",
+                            options = state.savingGoals.map { it.name },
+                            selectedOption = selectedGoal?.name,
+                            enabled = !state.isLoadingSavingGoals && !state.isSaving && state.savingGoals.isNotEmpty(),
+                            placeholder = when{
+                                state.isLoadingSavingGoals -> "Memuat target tabungan..."
+                                state.savingGoals.isEmpty() -> "Belum ada target tabungan"
+                                else -> "Pilih target tabungan"
+                            },
+                            onOptionSelected = { index ->
+                                state.savingGoals.getOrNull(index)?.let { goal ->
+                                    viewModel.setSavingGoalId(goal.id)
+                                }
                             }
-                        }
-                    )
+                        )
+                    }else{
+                        val selectedCategory = state.categories
+                            .firstOrNull { it.id == state.categoryId }
+                        CpDropdown(
+                            label = "Kategori",
+                            options = state.categories.map {it.name},
+                            selectedOption = selectedCategory?.name,
+                            enabled = !state.isLoadingCategories && !state.isSaving && state.categories.isNotEmpty(),
+                            placeholder = when{
+                                state.isLoadingCategories -> "Memuat kategori..."
+                                state.categories.isEmpty() -> "Belum ada kategori"
+                                else -> "Pilih kategori"
+                            },
+                            onOptionSelected = {index ->
+                                state.categories.getOrNull(index)?.let{
+                                    viewModel.setCategoryId(it.id)
+                                }
+                            }
+                        )
+                    }
 
-                    // Tanggal
                     CpDatePicker(
                         date = state.transactionDate,
                         onDateSelected = viewModel::setDate
                     )
 
-                    // Catatan
                     CpTextField(
                         value = state.note,
                         onValueChange = viewModel::setNote,
@@ -180,7 +196,6 @@ fun AddTransactionScreen(
                         maxLines = 5
                     )
 
-                    // Pesan error
                     state.error?.let { error ->
                         Text(
                             text = error,
@@ -191,7 +206,6 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(54.dp))
 
-                    // Tombol simpan
                     CpButton(
                         text = "Simpan",
                         onClick = {

@@ -502,11 +502,18 @@ private fun SavingGoalsCard(
     }
 }
 
+
 @Composable
 private fun SavingGoalPreview(
     goal: HomeSavingGoalUi,
     onClick: () -> Unit
 ) {
+    val remainingAmount = (goal.targetAmount - goal.savedAmount)
+        .coerceAtLeast(0L)
+
+    val isCompleted = goal.targetAmount > 0L &&
+            goal.savedAmount >= goal.targetAmount
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -524,7 +531,7 @@ private fun SavingGoalPreview(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                Icons.Default.Laptop,
+                imageVector = Icons.Default.Laptop,
                 contentDescription = null,
                 tint = HomeDarkGreen,
                 modifier = Modifier.size(28.dp)
@@ -538,7 +545,7 @@ private fun SavingGoalPreview(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                goal.name,
+                text = goal.name,
                 color = HomeDarkGreen,
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.bodyMedium,
@@ -547,7 +554,8 @@ private fun SavingGoalPreview(
             )
 
             Text(
-                "${formatRupiah(goal.savedAmount)} / ${formatRupiah(goal.targetAmount)}",
+                text = "${formatRupiah(goal.savedAmount)} / " +
+                        formatRupiah(goal.targetAmount),
                 color = HomeMutedText,
                 style = MaterialTheme.typography.labelSmall
             )
@@ -565,24 +573,41 @@ private fun SavingGoalPreview(
                     color = HomeGreen,
                     trackColor = Color(0xFFE3E3E3)
                 )
+
                 Text(
-                    "${(goal.progress * 100).toInt()}%",
+                    text = "${(goal.progress * 100).toInt()}%",
                     color = HomeDarkGreen,
                     fontWeight = FontWeight.Bold,
                     style = MaterialTheme.typography.labelSmall
                 )
             }
 
-            goal.estimatedCompletion?.let { estimate ->
+            if (isCompleted) {
                 Text(
-                    "Estimasi tercapai: $estimate",
+                    text = "Target tercapai!",
+                    color = HomeGreen,
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.labelSmall
+                )
+            } else {
+                Text(
+                    text = "Kurang ${formatRupiah(remainingAmount)}",
                     color = HomeMutedText,
                     style = MaterialTheme.typography.labelSmall
                 )
+
+                goal.estimatedCompletion?.let { estimate ->
+                    Text(
+                        text = "Estimasi tercapai: $estimate",
+                        color = HomeMutedText,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 private fun RecentTransactionsCard(

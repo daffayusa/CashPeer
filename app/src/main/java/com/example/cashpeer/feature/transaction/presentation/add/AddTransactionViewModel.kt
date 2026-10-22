@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cashpeer.feature.category.data.local.DefaultCategorySeeder
 import com.example.cashpeer.feature.category.domain.usecase.GetCategoryUseCase
+import com.example.cashpeer.feature.savinggoal.domain.usecase.ObserveSavingGoalUseCase
 import com.example.cashpeer.feature.transaction.domain.model.Transaction
 import com.example.cashpeer.feature.transaction.domain.model.TransactionType
 import com.example.cashpeer.feature.transaction.domain.usecase.AddTransactionUseCase
@@ -12,6 +13,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
@@ -20,7 +22,8 @@ import kotlin.coroutines.cancellation.CancellationException
 class AddTransactionViewModel @Inject constructor(
     private val addTransactionUseCase: AddTransactionUseCase,
     private val getCategoryUseCase: GetCategoryUseCase,
-    private val defaultCategorySeeder: DefaultCategorySeeder
+    private val defaultCategorySeeder: DefaultCategorySeeder,
+    private val observeSavingGoalUseCase: ObserveSavingGoalUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AddTransactionUiState())
@@ -32,6 +35,31 @@ class AddTransactionViewModel @Inject constructor(
         viewModelScope.launch {
             defaultCategorySeeder.seedIfNeeded(TEMP_USER_ID)
             observeCategories(_uiState.value.type)
+        }
+        observeSavingGoals()
+    }
+
+    private fun observeSavingGoals(){
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isLoadingSavingGoals = true
+            )
+            try {
+                observeSavingGoalUseCase(TEMP_USER_ID).collect(){goals ->
+                    _uiState.value = _uiState.value.copy(
+                        savingGoals = goals,
+                        isLoadingSavingGoals = false,
+                        savingGoalId = _uiState.value.savingGoalId ?.takeIf { id -> goals.any{it.id == id} }
+                    )
+                }
+            }catch (e: CancellationException){
+                throw e
+            }catch (e: Exception){
+                _uiState.value = _uiState.value.copy(
+                    isLoadingSavingGoals = false,
+                    error = e.message ?: "Gagal memuat target tabungan"
+                )
+            }
         }
     }
 
