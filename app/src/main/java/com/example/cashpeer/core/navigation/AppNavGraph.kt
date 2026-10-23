@@ -15,6 +15,8 @@ import com.example.cashpeer.feature.home.presentation.HomeScreen
 import com.example.cashpeer.feature.home.presentation.HomeViewModel
 import com.example.cashpeer.feature.savinggoal.presentation.SavingGoalFormScreen
 import com.example.cashpeer.feature.savinggoal.presentation.SavingGoalListScreen
+import com.example.cashpeer.feature.statistics.presentation.StatisticsScreen
+import com.example.cashpeer.feature.statistics.presentation.StatisticsViewModel
 import com.example.cashpeer.feature.transaction.presentation.add.AddTransactionScreen
 import com.example.cashpeer.feature.transaction.presentation.list.TransactionListScreen
 
@@ -111,7 +113,17 @@ fun AppNavGraph(
                 }
             )
         }
+        composable(AppRoute.STATISTICS) {
+            val viewModel: StatisticsViewModel = hiltViewModel()
+            val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+            StatisticsScreen(
+                uiState = uiState,
+                onPreviousMonth = viewModel::previousMonth,
+                onNextMonth = viewModel::nextMonth,
+                onCurrentMonth = viewModel::selectCurrentMonth
+            )
+        }
 
     }
 }

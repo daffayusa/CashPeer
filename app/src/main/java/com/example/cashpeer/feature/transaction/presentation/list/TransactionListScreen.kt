@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,24 +67,20 @@ fun TransactionListScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Daftar Transaksi",
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Kembali"
-                        )
-                    }
-                }
-            )
-        },
+//        topBar = {
+//            TopAppBar(
+//                title = {
+//                    Text(
+//                        text = "Daftar Transaksi",
+//                        fontWeight = FontWeight.SemiBold
+//                    )
+//                },
+//                colors = TopAppBarDefaults.topAppBarColors(
+//                    containerColor = MaterialTheme.colorScheme.surface
+//                ),
+//                windowInsets = TopAppBarDefaults.windowInsets
+//            )
+//        },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddTransaction, shape = CircleShape, containerColor = MaterialTheme.colorScheme.primary, modifier = Modifier . offset(x = -8.dp, y = -24.dp)) {
                 Icon(
@@ -94,6 +91,12 @@ fun TransactionListScreen(
             }
         }
     ) { innerPadding ->
+        Text(
+            text = "Daftar Transaksi",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(start = 18.dp, end = 18.dp, top = 18.dp, bottom = 18.dp)
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
