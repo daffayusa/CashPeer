@@ -82,7 +82,7 @@ fun TransactionListScreen(
 //            )
 //        },
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddTransaction, shape = CircleShape, containerColor = MaterialTheme.colorScheme.primary, modifier = Modifier . offset(x = -8.dp, y = -24.dp)) {
+            FloatingActionButton(onClick = onAddTransaction, shape = CircleShape, containerColor = MaterialTheme.colorScheme.primary, modifier = Modifier . offset(x = -8.dp, y = -86.dp)) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Tambah transaksi"
@@ -185,7 +185,7 @@ fun TransactionListScreen(
                         } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(vertical = 4.dp),
+                                contentPadding = PaddingValues(top = 4.dp, bottom = 64.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 items(

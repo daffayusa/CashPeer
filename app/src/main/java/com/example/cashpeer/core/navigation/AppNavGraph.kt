@@ -41,7 +41,9 @@ fun AppNavGraph(
                     navController.navigate(AppRoute.ADD_TRANSACTION)
                 },
                 onViewTransactions = {
-                    navController.navigate(AppRoute.TRANSACTION)
+                    navController.navigate(AppRoute.TRANSACTION){
+                        launchSingleTop = true
+                    }
                 },
                 onViewSavingGoals = {
                     navController.navigate(AppRoute.SAVING_GOALS)

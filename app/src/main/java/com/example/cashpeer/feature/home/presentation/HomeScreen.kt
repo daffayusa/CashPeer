@@ -35,8 +35,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cashpeer.core.ui.theme.CashPeerTheme
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -68,7 +70,7 @@ fun HomeScreen(
             start = 16.dp,
             end = 16.dp,
             top = 12.dp,
-            bottom = 16.dp
+            bottom = 64.dp
         ),
         verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
@@ -83,17 +85,9 @@ fun HomeScreen(
             HomeBalanceCard(
                 balance = uiState.totalBalance,
                 income = uiState.monthlyIncome,
-                expense = uiState.monthlyExpense
-            )
-        }
-
-        item {
-            MonthlySummaryCard(
-                monthLabel = uiState.monthLabel,
-                income = uiState.monthlyIncome,
                 expense = uiState.monthlyExpense,
-                balance = uiState.totalBalance,
-                onMonthClick = {showMonthDialog = true}
+                monthLabel = uiState.monthLabel,
+                onMonthClick = { showMonthDialog = true }
             )
         }
 
@@ -217,225 +211,205 @@ private fun HomeHeader(
 private fun HomeBalanceCard(
     balance: Long,
     income: Long,
-    expense: Long
+    expense: Long,
+    monthLabel: String,
+    onMonthClick: () -> Unit
 ) {
+    val netCashFlow = income - expense
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(22.dp))
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
                         Color(0xFF45C47B),
-                        Color(0xFF149653)
+                        Color(0xFF078D49)
                     )
                 )
             )
-            .padding(top = 16.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Default.AccountBalanceWallet,
-                contentDescription = null,
-                tint = Color.White
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(
-                "TOTAL SALDO",
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Text(
-            text = formatRupiah(balance),
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-            color = Color.White,
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
-        )
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color(0x22000000))
-                .padding(horizontal = 14.dp, vertical = 10.dp)
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Pemasukan", color = Color.White)
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.ArrowDownward,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        formatRupiah(income),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text("Pengeluaran", color = Color.White)
-                Spacer(Modifier.height(4.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        formatRupiah(expense),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun MonthlySummaryCard(
-    monthLabel: String,
-    income: Long,
-    expense: Long,
-    balance: Long,
-    onMonthClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 6.dp, vertical = 8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "TOTAL SALDO",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(Modifier.weight(1f))
+                TextButton(
+                    onClick = onMonthClick,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
+                    colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                ) {
+                    Text(
+                        text = monthLabel.ifBlank { "Bulan ini" },
+                        style = MaterialTheme.typography.labelMedium,
+                        maxLines = 1
+                    )
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = "Pilih bulan",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = formatRupiah(balance),
+                modifier = Modifier.padding(top = 2.dp),
+                color = Color.White,
+                fontSize = 24.sp,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Saldo saat ini",
+                modifier = Modifier.padding(top = 2.dp),
+                color = Color.White.copy(alpha = 0.9f),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(17.dp))
+                .background(Color(0xFFF1FFF6))
+                .padding(horizontal = 12.dp, vertical = 14.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    tint = HomeDarkGreen
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(
-                    "Ringkasan Bulan Ini",
+                Row(
                     modifier = Modifier.weight(1f),
-                    color = HomeDarkGreen,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                TextButton(
-                    onClick = onMonthClick,
-                    contentPadding = PaddingValues(horizontal = 4.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        monthLabel.ifBlank { "Bulan ini" },
-                        color = HomeMutedText,
-                        style = MaterialTheme.typography.labelSmall
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFD8F5E4)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDownward,
+                            contentDescription = null,
+                            tint = HomeDarkGreen,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "Pemasukan",
+                            color = HomeMutedText,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = formatRupiah(income),
+                            color = HomeDarkGreen,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+
+                Spacer(Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(42.dp)
+                        .background(Color(0xFFD4E9DC))
+                )
+                Spacer(Modifier.width(12.dp))
+
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFFFE3E7)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowUpward,
+                            contentDescription = null,
+                            tint = HomeRed,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            text = "Pengeluaran",
+                            color = HomeMutedText,
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = formatRupiah(expense),
+                            color = HomeRed,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                SummaryValue(
-                    modifier = Modifier.weight(1f),
-                    label = "Pemasukan",
-                    amount = income,
-                    color = HomeGreen,
-                    icon = {
-                        Icon(
-                            Icons.Default.ArrowDownward,
-                            contentDescription = null,
-                            tint = HomeGreen,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFDDF6E8))
+                    .padding(horizontal = 10.dp, vertical = 11.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.TrendingUp,
+                    contentDescription = null,
+                    tint = HomeDarkGreen,
+                    modifier = Modifier.size(21.dp)
                 )
-                SummaryValue(
-                    modifier = Modifier.weight(1f),
-                    label = "Pengeluaran",
-                    amount = expense,
-                    color = HomeRed,
-                    icon = {
-                        Icon(
-                            Icons.Default.ArrowUpward,
-                            contentDescription = null,
-                            tint = HomeRed,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = "Arus kas bersih",
+                    color = Color(0xFF245D3C),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
                 )
-                SummaryValue(
-                    modifier = Modifier.weight(1f),
-                    label = "Saldo",
-                    amount = balance,
-                    color = HomeDarkGreen,
-                    icon = {
-                        Icon(
-                            Icons.Default.AccountBalanceWallet,
-                            contentDescription = null,
-                            tint = HomeDarkGreen,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
+                Text(
+                    text = (if (netCashFlow > 0) "+" else "") + formatRupiah(netCashFlow),
+                    color = if (netCashFlow >= 0) HomeDarkGreen else HomeRed,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun SummaryValue(
-    modifier: Modifier = Modifier,
-    label: String,
-    amount: Long,
-    color: Color,
-    icon: @Composable () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(HomeMutedGreen)
-            .padding(horizontal = 7.dp, vertical = 9.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            icon()
-            Spacer(Modifier.width(3.dp))
-            Text(
-                text = label,
-                color = HomeMutedText,
-                style = MaterialTheme.typography.labelSmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        Spacer(Modifier.height(5.dp))
-
-        Text(
-            text = formatRupiah(amount),
-            color = color,
-            fontWeight = FontWeight.SemiBold,
-            style = MaterialTheme.typography.labelMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
     }
 }
 
@@ -448,8 +422,8 @@ private fun SavingGoalsCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(HomeLightGreen)
+            .clip(RoundedCornerShape(18.dp))
+            .background(Color.White)
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -800,4 +774,18 @@ private fun formatRupiah(amount: Long): String {
     return NumberFormat.getCurrencyInstance(
         Locale("id", "ID")
     ).format(amount).replace(",00", "")
+}
+
+@Preview
+@Composable
+private fun HomeScreenPrev() {
+    CashPeerTheme {
+        HomeBalanceCard(
+            balance = 3000000L,
+            income = 2300000L,
+            expense = 1500000L,
+            monthLabel = "Oktober 2026",
+            onMonthClick = {}
+        )
+    }
 }
