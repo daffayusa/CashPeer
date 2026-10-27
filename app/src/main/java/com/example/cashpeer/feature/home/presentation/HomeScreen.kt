@@ -423,7 +423,7 @@ private fun SavingGoalsCard(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(18.dp))
-            .background(Color.White)
+            .background(HomeLightGreen)
             .padding(14.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -776,16 +776,34 @@ private fun formatRupiah(amount: Long): String {
     ).format(amount).replace(",00", "")
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-private fun HomeScreenPrev() {
+private fun SavingGoalsCardPreview() {
     CashPeerTheme {
-        HomeBalanceCard(
-            balance = 3000000L,
-            income = 2300000L,
-            expense = 1500000L,
-            monthLabel = "Oktober 2026",
-            onMonthClick = {}
-        )
+        Surface(
+            modifier = Modifier.padding(16.dp),
+            color = Color(0xFFF5F6F5)
+        ) {
+            SavingGoalsCard(
+                goals = listOf(
+                    HomeSavingGoalUi(
+                        id = 1L,
+                        name = "Beli Laptop Baru",
+                        savedAmount = 4500000L,
+                        targetAmount = 10000000L,
+                        estimatedCompletion = "Desember 2026"
+                    ),
+                    HomeSavingGoalUi(
+                        id = 2L,
+                        name = "Dana Darurat",
+                        savedAmount = 3000000L,
+                        targetAmount = 5000000L,
+                        estimatedCompletion = "Oktober 2026"
+                    )
+                ),
+                onViewAll = {},
+                onGoalClick = {}
+            )
+        }
     }
 }

@@ -57,14 +57,14 @@ class UpdateTransactionUseCase @Inject constructor(
                             "Saving goal harus dipilih"
                         )
                     )
+                }
 
-                    if (transaction.categoryId != null) {
-                        return Result.failure(
-                            IllegalArgumentException(
-                                "Transaksi saving tidak boleh memiliki kategori"
-                            )
+                if (transaction.categoryId != null) {
+                    return Result.failure(
+                        IllegalArgumentException(
+                            "Transaksi saving tidak boleh memiliki kategori"
                         )
-                    }
+                    )
                 }
             }
 
