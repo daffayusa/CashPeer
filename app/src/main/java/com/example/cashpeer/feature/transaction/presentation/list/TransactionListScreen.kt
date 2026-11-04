@@ -1,5 +1,6 @@
 package com.example.cashpeer.feature.transaction.presentation.list
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +25,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,11 +38,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle.Alignment
@@ -64,6 +71,9 @@ fun TransactionListScreen(
     viewModel: TransactionListViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    var transactionToDelete by remember {
+        mutableStateOf<Transaction?>(null)
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -200,7 +210,10 @@ fun TransactionListScreen(
 
                                     TransactionItem(
                                         transaction = transaction,
-                                        categoryName = categoryName
+                                        categoryName = categoryName,
+                                        onDelete = {
+                                            transactionToDelete = transaction
+                                        }
                                     )
                                 }
                             }
@@ -211,6 +224,64 @@ fun TransactionListScreen(
         }
 
     }
+    transactionToDelete?.let {transaction ->
+        AlertDialog(
+            onDismissRequest = {
+                transactionToDelete = null
+            },
+            title = {
+                Text("Hapus Transaksi?")
+            },
+            text = {
+                Text("Transaksi ini akan dihapus secara permanen. Apakah kamu yakin?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteTransaction(transaction)
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = "Hapus",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        transactionToDelete = null
+                    }
+                ) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+
+    state.deleteError?.let { error ->
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.clearDeleteError()
+            },
+            title = {
+                Text("Gagal Menghapus")
+            },
+            text = {
+                Text(error)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.clearDeleteError()
+                    }
+                ) {
+                    Text("Tutup")
+                }
+            }
+        )
+    }
 
 }
 
@@ -220,7 +291,8 @@ fun TransactionListScreen(
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
-    categoryName: String?
+    categoryName: String?,
+    onDelete: () -> Unit
 ) {
     val isIncome = transaction.type == TransactionType.INCOME
     val typeLabel = when (transaction.type){
@@ -294,6 +366,16 @@ private fun TransactionItem(
                 fontWeight = FontWeight.SemiBold,
                 color = amountColor
             )
+
+            IconButton(
+                onClick = onDelete
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Hapus transaksi",
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
         }
     }
 }

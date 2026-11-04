@@ -9,5 +9,6 @@ data class TransactionListUiState(
     val categories: List<Category> = emptyList(),
     val selectedType: TransactionType? = null,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    val deleteError: String? = null
 )

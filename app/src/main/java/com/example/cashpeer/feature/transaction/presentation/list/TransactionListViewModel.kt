@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.cashpeer.feature.category.domain.usecase.GetCategoryUseCase
 import com.example.cashpeer.feature.transaction.domain.model.Transaction
 import com.example.cashpeer.feature.transaction.domain.model.TransactionType
+import com.example.cashpeer.feature.transaction.domain.usecase.DeleteTransactionUseCase
 import com.example.cashpeer.feature.transaction.domain.usecase.GetTransactionsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ import kotlin.coroutines.cancellation.CancellationException
 @HiltViewModel
 class TransactionListViewModel @Inject constructor(
     private val getTransactionsUseCase: GetTransactionsUseCase,
-    private val getCategoryUseCase: GetCategoryUseCase
+    private val getCategoryUseCase: GetCategoryUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionListUiState())
@@ -45,7 +47,9 @@ class TransactionListViewModel @Inject constructor(
                     TransactionListUiState(
                         transactions = transactions,
                         categories = incomeCategories + expenseCategories,
-                        isLoading = false
+                        isLoading = false,
+                        selectedType = _uiState.value.selectedType,
+                        deleteError = _uiState.value.deleteError
                     )
                 }.collect { state ->
                     _uiState.value = state
@@ -64,6 +68,33 @@ class TransactionListViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(selectedType = type)
     }
 
+    fun deleteTransaction(transaction: Transaction) {
+        viewModelScope.launch {
+            try {
+                val result = deleteTransactionUseCase(transaction)
+
+                result.onFailure { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        deleteError = exception.message
+                            ?: "Gagal menghapus transaksi"
+                    )
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    deleteError = e.message
+                        ?: "Terjadi kesalahan saat menghapus transaksi"
+                )
+            }
+        }
+    }
+
+    fun clearDeleteError(){
+        _uiState.value = _uiState.value.copy(
+            deleteError = null
+        )
+    }
     private companion object {
         const val TEMP_USER_ID = 1L
     }
