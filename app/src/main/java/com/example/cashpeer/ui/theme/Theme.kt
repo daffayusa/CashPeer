@@ -1,22 +1,12 @@
 package com.example.cashpeer.core.ui.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.example.cashpeer.ui.theme.BackgroundLight
-import com.example.cashpeer.ui.theme.Error
-import com.example.cashpeer.ui.theme.GreenContainer
-import com.example.cashpeer.ui.theme.GreenDark
-import com.example.cashpeer.ui.theme.GreenLight
-import com.example.cashpeer.ui.theme.GreenPrimary
-import com.example.cashpeer.ui.theme.Outline
-import com.example.cashpeer.ui.theme.OutlineLight
-import com.example.cashpeer.ui.theme.SurfaceVariantLight
-import com.example.cashpeer.ui.theme.SurfaceWhite
-import com.example.cashpeer.ui.theme.TextOnPrimary
-import com.example.cashpeer.ui.theme.TextPrimary
-import com.example.cashpeer.ui.theme.TextSecondary
+import com.example.cashpeer.ui.theme.*
 
 private val CashPeerLightColorScheme = lightColorScheme(
     primary = GreenPrimary,
@@ -42,15 +32,43 @@ private val CashPeerLightColorScheme = lightColorScheme(
 
     error = Error,
     onError = Color.White
+)
 
+private val CashPeerDarkColorScheme = darkColorScheme(
+    primary = GreenPrimaryDark,
+    onPrimary = Color(0xFF00381B),
+    primaryContainer = GreenDarkContainer,
+    onPrimaryContainer = Color(0xFF90F9B4),
+
+    secondary = GreenPrimaryDark,
+    onSecondary = Color(0xFF00381B),
+    secondaryContainer = GreenDarkContainer,
+    onSecondaryContainer = Color(0xFF9DF5B8),
+
+    background = BackgroundDark,
+    onBackground = TextPrimaryDark,
+
+    surface = SurfaceDark,
+    onSurface = TextPrimaryDark,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = TextSecondaryDark,
+
+    outline = OutlineDark,
+    outlineVariant = OutlineLightDark,
+
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005)
 )
 
 @Composable
 fun CashPeerTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
+    val colorScheme = if (darkTheme) CashPeerDarkColorScheme else CashPeerLightColorScheme
+
     MaterialTheme(
-        colorScheme = CashPeerLightColorScheme,
+        colorScheme = colorScheme,
         typography = CashPeerTypography,
         content = content
     )

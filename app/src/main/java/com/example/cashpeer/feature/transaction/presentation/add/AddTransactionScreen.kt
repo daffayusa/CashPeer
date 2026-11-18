@@ -43,6 +43,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cashpeer.core.ui.components.CpButton
 import com.example.cashpeer.core.ui.components.CpDatePicker
 import com.example.cashpeer.core.ui.components.CpDropdown
+import com.example.cashpeer.core.ui.components.CpRupiahTextField
 import com.example.cashpeer.core.ui.components.CpSegmentedButton
 import com.example.cashpeer.core.ui.components.CpTextField
 import com.example.cashpeer.core.ui.theme.CashPeerTheme
@@ -133,12 +134,11 @@ fun AddTransactionScreen(
                         }
                     )
 
-                    CpTextField(
+                    CpRupiahTextField(
                         value = state.amount,
                         onValueChange = viewModel::setAmount,
                         label = "Nominal",
-                        placeholder = "Masukkan nominal",
-                        keyboardType = KeyboardType.Number
+                        placeholder = "0"
                     )
 
 

@@ -5,6 +5,7 @@ data class HomeUiState(
     val totalBalance: Long = 0L,
     val monthlyIncome: Long = 0L,
     val monthlyExpense: Long = 0L,
+    val monthlyBudget: Long = 0L,
     val monthLabel: String = "",
     val savingGoals: List<HomeSavingGoalUi> = emptyList(),
     val recentTransactions: List<HomeTransactionUi> = emptyList(),

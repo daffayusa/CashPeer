@@ -11,13 +11,17 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.cashpeer.feature.category.presentation.CategoryManagementScreen
 import com.example.cashpeer.feature.home.presentation.HomeScreen
 import com.example.cashpeer.feature.home.presentation.HomeViewModel
+import com.example.cashpeer.feature.profile.presentation.ProfileScreen
 import com.example.cashpeer.feature.savinggoal.presentation.SavingGoalFormScreen
 import com.example.cashpeer.feature.savinggoal.presentation.SavingGoalListScreen
+import com.example.cashpeer.feature.savinggoal.presentation.detail.SavingGoalDetailScreen
 import com.example.cashpeer.feature.statistics.presentation.StatisticsScreen
 import com.example.cashpeer.feature.statistics.presentation.StatisticsViewModel
 import com.example.cashpeer.feature.transaction.presentation.add.AddTransactionScreen
+import com.example.cashpeer.feature.transaction.presentation.edit.EditTransactionScreen
 import com.example.cashpeer.feature.transaction.presentation.list.TransactionListScreen
 
 
@@ -49,7 +53,7 @@ fun AppNavGraph(
                     navController.navigate(AppRoute.SAVING_GOALS)
                 },
                 onSavingGoalClick = { goalId ->
-                    navController.navigate(AppRoute.editSavingGoal(goalId))
+                    navController.navigate(AppRoute.savingGoalDetail(goalId))
                 },
                 onMonthClick = {},
                 onPreviousMonth = {
@@ -57,7 +61,8 @@ fun AppNavGraph(
                 },
                 onNextMonth = {
                     viewModel.nextMonth()
-                }
+                },
+                onSetBudget = viewModel::setMonthlyBudget
 
             )
         }
@@ -67,6 +72,9 @@ fun AppNavGraph(
                 onBack = {},
                 onAddTransaction = {
                     navController.navigate(AppRoute.ADD_TRANSACTION)
+                },
+                onEditTransaction = { id ->
+                    navController.navigate(AppRoute.editTransaction(id))
                 }
             )
         }
@@ -86,6 +94,33 @@ fun AppNavGraph(
             SavingGoalListScreen(
                 onAddClick = {
                     navController.navigate(AppRoute.ADD_SAVING_GOALS)
+                },
+                onGoalClick = { goalId ->
+                    navController.navigate(AppRoute.savingGoalDetail(goalId))
+                },
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = AppRoute.SAVING_GOAL_DETAIL,
+            arguments = listOf(
+                navArgument("goalId") {
+                    type = NavType.LongType
+                }
+            )
+        ) {
+            SavingGoalDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onEditGoal = { goalId ->
+                    navController.navigate(AppRoute.editSavingGoal(goalId))
+                },
+                onEditTransaction = { transactionId ->
+                    navController.navigate(AppRoute.editTransaction(transactionId))
                 }
             )
         }
@@ -124,6 +159,39 @@ fun AppNavGraph(
                 onPreviousMonth = viewModel::previousMonth,
                 onNextMonth = viewModel::nextMonth,
                 onCurrentMonth = viewModel::selectCurrentMonth
+            )
+        }
+
+        composable(
+            route = AppRoute.EDIT_TRANSACTION,
+            arguments = listOf(
+                navArgument("transactionId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getLong("transactionId") ?: return@composable
+            EditTransactionScreen(
+                transactionId = transactionId,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(AppRoute.PROFILE) {
+            ProfileScreen(
+                onNavigateToCategories = {
+                    navController.navigate(AppRoute.CATEGORY_MANAGEMENT)
+                }
+            )
+        }
+
+        composable(AppRoute.CATEGORY_MANAGEMENT) {
+            CategoryManagementScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
             )
         }
 

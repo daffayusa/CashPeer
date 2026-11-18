@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.cashpeer.core.ui.components.CpRupiahTextField
 import com.example.cashpeer.core.ui.theme.CashPeerTheme
 import java.text.NumberFormat
 import java.util.Locale
@@ -59,7 +60,8 @@ fun HomeScreen(
     onSavingGoalClick: (Long) -> Unit = {},
     onMonthClick: () -> Unit = {},
     onPreviousMonth: () -> Unit = {},
-    onNextMonth: () -> Unit = {}
+    onNextMonth: () -> Unit = {},
+    onSetBudget: (Long) -> Unit = {}
 ) {
     var showMonthDialog by remember { mutableStateOf(false) }
     LazyColumn(
@@ -88,6 +90,14 @@ fun HomeScreen(
                 expense = uiState.monthlyExpense,
                 monthLabel = uiState.monthLabel,
                 onMonthClick = { showMonthDialog = true }
+            )
+        }
+
+        item {
+            MonthlyBudgetCard(
+                budget = uiState.monthlyBudget,
+                expense = uiState.monthlyExpense,
+                onSetBudget = onSetBudget
             )
         }
 
@@ -414,6 +424,139 @@ private fun HomeBalanceCard(
 }
 
 @Composable
+private fun MonthlyBudgetCard(
+    budget: Long,
+    expense: Long,
+    onSetBudget: (Long) -> Unit
+) {
+    var showBudgetDialog by remember { mutableStateOf(false) }
+    var inputAmount by remember(budget) { mutableStateOf(if (budget > 0L) budget.toString() else "") }
+
+    val progress = if (budget > 0L) (expense.toFloat() / budget.toFloat()).coerceIn(0f, 1f) else 0f
+    val percent = if (budget > 0L) ((expense.toDouble() / budget.toDouble()) * 100).toInt() else 0
+    val isOverBudget = budget > 0L && expense > budget
+
+    val progressColor = when {
+        isOverBudget -> Color(0xFFFF3348)
+        percent >= 75 -> Color(0xFFF9A825)
+        else -> HomeGreen
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "🎯 Anggaran Belanja Bulan Ini",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1f)
+                )
+                TextButton(
+                    onClick = { showBudgetDialog = true },
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp)
+                ) {
+                    Text(
+                        text = if (budget > 0L) "Ubah" else "Atur",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = HomeGreen,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+
+            if (budget <= 0L) {
+                Text(
+                    text = "Belum ada batas anggaran bulanan. Yuk atur batas pengeluaranmu!",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = HomeMutedText
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${formatRupiah(expense)} / ${formatRupiah(budget)}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = "$percent%",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = progressColor
+                    )
+                }
+
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(7.dp)
+                        .clip(CircleShape),
+                    color = progressColor,
+                    trackColor = Color(0xFFE8E8E8)
+                )
+
+                Text(
+                    text = if (isOverBudget) {
+                        "⚠️ Melebihi anggaran sebesar ${formatRupiah(expense - budget)}!"
+                    } else {
+                        "Sisa anggaran: ${formatRupiah(budget - expense)}"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (isOverBudget) Color(0xFFFF3348) else HomeMutedText,
+                    fontWeight = if (isOverBudget) FontWeight.SemiBold else FontWeight.Normal
+                )
+            }
+        }
+    }
+
+    if (showBudgetDialog) {
+        AlertDialog(
+            onDismissRequest = { showBudgetDialog = false },
+            title = { Text("Atur Anggaran Bulanan") },
+            text = {
+                CpRupiahTextField(
+                    value = inputAmount,
+                    onValueChange = { inputAmount = it },
+                    label = "Batas Anggaran",
+                    placeholder = "0"
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val amount = inputAmount.toLongOrNull() ?: 0L
+                        onSetBudget(amount)
+                        showBudgetDialog = false
+                    }
+                ) {
+                    Text("Simpan")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBudgetDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+}
+
+@Composable
 private fun SavingGoalsCard(
     goals: List<HomeSavingGoalUi>,
     onViewAll: () -> Unit,
@@ -504,11 +647,9 @@ private fun SavingGoalPreview(
                 .background(HomeLightGreen),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Laptop,
-                contentDescription = null,
-                tint = HomeDarkGreen,
-                modifier = Modifier.size(28.dp)
+            Text(
+                text = com.example.cashpeer.feature.savinggoal.domain.model.getSavingGoalEmoji(goal.name),
+                fontSize = 24.sp
             )
         }
 

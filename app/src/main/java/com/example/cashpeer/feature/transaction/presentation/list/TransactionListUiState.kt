@@ -8,6 +8,8 @@ data class TransactionListUiState(
     val transactions: List<Transaction> = emptyList(),
     val categories: List<Category> = emptyList(),
     val selectedType: TransactionType? = null,
+    val selectedCategoryId: Long? = null,
+    val searchQuery: String = "",
     val isLoading: Boolean = true,
     val error: String? = null,
     val deleteError: String? = null

@@ -9,4 +9,9 @@ interface CategoryRepository{
         userId: Long,
         type: TransactionType
     ): Flow<List<Category>>
+
+    fun observeAllCategories(userId: Long): Flow<List<Category>>
+    suspend fun addCategory(category: Category): Result<Long>
+    suspend fun updateCategory(category: Category): Result<Unit>
+    suspend fun deleteCategory(category: Category): Result<Unit>
 }

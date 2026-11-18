@@ -31,6 +31,16 @@ class SavingGoalRepositoryImpl @Inject constructor(
         )?.toDomain()
     }
 
+    override fun observeSavingGoalById(
+        userId: Long,
+        goalId: Long
+    ): Flow<SavingGoal?> {
+        return savingGoalDao.observeSavingGoalById(
+            userId = userId,
+            goalId = goalId
+        ).map { it?.toDomain() }
+    }
+
     override fun observeSavedAmount(
         userId: Long,
         goalId: Long

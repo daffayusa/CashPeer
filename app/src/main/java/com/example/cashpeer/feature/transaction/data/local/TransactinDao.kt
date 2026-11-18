@@ -116,6 +116,20 @@ interface TransactionDao {
         endDate: String
     ): Flow<Long>
 
+    @Query(
+        """
+        SELECT *
+        FROM transactions
+        WHERE user_id = :userId
+          AND saving_goal_id = :goalId
+        ORDER BY transaction_date DESC, id DESC
+        """
+    )
+    fun observeTransactionsBySavingGoal(
+        userId: Long,
+        goalId: Long
+    ): Flow<List<TransactionEntity>>
+
 
     @Insert
     suspend fun insert(

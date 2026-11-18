@@ -16,10 +16,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -28,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.cashpeer.feature.statistics.presentation.ExpenseCategoryUi
 import com.example.cashpeer.feature.statistics.presentation.MonthlyTrendUi
@@ -58,7 +64,9 @@ fun StatisticsSectionCard(
         )
     ) {
         Column(
-            modifier = modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
@@ -68,33 +76,40 @@ fun StatisticsSectionCard(
             content()
         }
     }
-
 }
 
 @Composable
 fun StatisticsSummaryCard(
     modifier: Modifier = Modifier,
     title: String,
-    amount: Long
+    amount: Long,
+    titleColor: Color = Color.Unspecified,
+    amountColor: Color = Color.Unspecified
 ) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = modifier.padding(14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                color = if (titleColor != Color.Unspecified) titleColor else MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = formatRupiah(amount),
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (amountColor != Color.Unspecified) amountColor else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -278,24 +293,51 @@ fun SavingGoalProgressCard(
 }
 
 @Composable
-fun ExpenseCategoryDonutChart(
-    categories: List<ExpenseCategoryUi>,
+fun CategoryDonutChart(
+    expenseCategories: List<ExpenseCategoryUi>,
     totalExpense: Long,
+    incomeCategories: List<ExpenseCategoryUi>,
+    totalIncome: Long,
     modifier: Modifier = Modifier
 ) {
+    var selectedTab by remember { mutableStateOf(0) } // 0 = Pengeluaran, 1 = Pemasukan
+
+    val isExpenseTab = selectedTab == 0
+    val activeCategories = if (isExpenseTab) expenseCategories else incomeCategories
+    val activeTotal = if (isExpenseTab) totalExpense else totalIncome
+    val totalLabel = if (isExpenseTab) "Total pengeluaran" else "Total pemasukan"
+    val emptyLabel = if (isExpenseTab) "Belum ada pengeluaran pada bulan ini." else "Belum ada pemasukan pada bulan ini."
+
     val trackColor = MaterialTheme.colorScheme.surfaceVariant
     val totalColor = MaterialTheme.colorScheme.onSurface
     val supportingColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     StatisticsSectionCard(
-        title = "Pengeluaran per kategori",
+        title = "Rincian per Kategori",
         modifier = modifier
     ) {
-        if (totalExpense <= 0L || categories.isEmpty()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(
+                selected = isExpenseTab,
+                onClick = { selectedTab = 0 },
+                label = { Text("Pengeluaran") }
+            )
+            FilterChip(
+                selected = !isExpenseTab,
+                onClick = { selectedTab = 1 },
+                label = { Text("Pemasukan") }
+            )
+        }
+
+        if (activeTotal <= 0L || activeCategories.isEmpty()) {
             Text(
-                text = "Belum ada pengeluaran pada bulan ini.",
+                text = emptyLabel,
                 color = supportingColor,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(vertical = 12.dp)
             )
             return@StatisticsSectionCard
         }
@@ -329,10 +371,10 @@ fun ExpenseCategoryDonutChart(
 
                 var startAngle = -90f
 
-                categories.forEachIndexed { index, category ->
+                activeCategories.forEachIndexed { index, category ->
                     val sweepAngle =
                         category.amount.toFloat() /
-                                totalExpense.toFloat() * 360f
+                                activeTotal.toFloat() * 360f
 
                     if (sweepAngle > 0f) {
                         drawArc(
@@ -358,21 +400,22 @@ fun ExpenseCategoryDonutChart(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "Total pengeluaran",
+                    text = totalLabel,
                     color = supportingColor,
                     style = MaterialTheme.typography.labelSmall
                 )
                 Text(
-                    text = formatChartRupiah(totalExpense),
+                    text = formatChartRupiah(activeTotal),
                     color = totalColor,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        categories.forEachIndexed { index, category ->
+        activeCategories.forEachIndexed { index, category ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -399,7 +442,8 @@ fun ExpenseCategoryDonutChart(
                 ) {
                     Text(
                         text = formatChartRupiah(category.amount),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
                     )
                     Text(
                         text = "${category.percentage.toInt()}%",
@@ -410,6 +454,21 @@ fun ExpenseCategoryDonutChart(
             }
         }
     }
+}
+
+@Composable
+fun ExpenseCategoryDonutChart(
+    categories: List<ExpenseCategoryUi>,
+    totalExpense: Long,
+    modifier: Modifier = Modifier
+) {
+    CategoryDonutChart(
+        expenseCategories = categories,
+        totalExpense = totalExpense,
+        incomeCategories = emptyList(),
+        totalIncome = 0L,
+        modifier = modifier
+    )
 }
 
 private val chartColors = listOf(

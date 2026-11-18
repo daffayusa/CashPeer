@@ -12,6 +12,7 @@ data class StatisticsUiState(
     val remainingAmount: Long = 0L,
     val highestExpenseCategory: ExpenseCategoryUi? = null,
     val expenseCategories: List<ExpenseCategoryUi> = emptyList(),
+    val incomeCategories: List<ExpenseCategoryUi> = emptyList(),
     val monthlyTrends: List<MonthlyTrendUi> = emptyList(),
     val savingGoals: List<SavingGoalProgressUi> = emptyList(),
     val isLoading: Boolean = true,

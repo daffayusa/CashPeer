@@ -14,6 +14,11 @@ interface SavingGoalRepository {
         goalId: Long
     ): SavingGoal?
 
+    fun observeSavingGoalById(
+        userId: Long,
+        goalId: Long
+    ): Flow<SavingGoal?>
+
     fun observeSavedAmount(
         userId: Long,
         goalId: Long

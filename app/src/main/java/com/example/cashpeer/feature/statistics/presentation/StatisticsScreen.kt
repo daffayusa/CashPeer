@@ -14,8 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.cashpeer.core.ui.components.CategoryDonutChart
 import com.example.cashpeer.core.ui.components.ExpenseCategoryCard
 import com.example.cashpeer.core.ui.components.ExpenseCategoryDonutChart
 import com.example.cashpeer.core.ui.components.ExpenseRatioCard
@@ -50,46 +52,41 @@ fun StatisticsScreen(
             )
         }
 
-//        item {
-//            Text(
-//                text = "Ringkasan keuangan",
-//                style = MaterialTheme.typography.titleLarge
-//            )
-//        }
-
-//        item {
-//            Row(
-//                modifier = Modifier.fillMaxWidth(),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp)
-//            ) {
-//                StatisticsSummaryCard(
-//                    title = "Pemasukan",
-//                    amount = uiState.totalIncome,
-//                    modifier = Modifier.weight(1f)
-//                )
-//                StatisticsSummaryCard(
-//                    title = "Pengeluaran",
-//                    amount = uiState.totalExpense,
-//                    modifier = Modifier.weight(1f)
-//                )
-//            }
-//        }
-
-//        item {
-//            StatisticsSummaryCard(
-//                title = "Tabungan bulan ini",
-//                amount = uiState.totalSaving,
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//        }
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatisticsSummaryCard(
+                    title = "Pemasukan",
+                    amount = uiState.totalIncome,
+                    amountColor = Color(0xFF2FB66A),
+                    modifier = Modifier.weight(1f)
+                )
+                StatisticsSummaryCard(
+                    title = "Pengeluaran",
+                    amount = uiState.totalExpense,
+                    amountColor = Color(0xFFFF3348),
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
 
         item {
-//            ExpenseCategoryCard(
-//                category = uiState.highestExpenseCategory
-//            )
-            ExpenseCategoryDonutChart(
-                categories = uiState.expenseCategories,
-                totalExpense = uiState.totalExpense
+            StatisticsSummaryCard(
+                title = "Tabungan bulan ini",
+                amount = uiState.totalSaving,
+                amountColor = Color(0xFF4782E8),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        item {
+            CategoryDonutChart(
+                expenseCategories = uiState.expenseCategories,
+                totalExpense = uiState.totalExpense,
+                incomeCategories = uiState.incomeCategories,
+                totalIncome = uiState.totalIncome
             )
         }
 

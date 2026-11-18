@@ -38,6 +38,11 @@ interface TransactionRepository{
         endDate: String
     ): Flow<Long>
 
+    fun observeTransactionsBySavingGoal(
+        userId: Long,
+        goalId: Long
+    ): Flow<List<Transaction>>
+
     suspend fun getTransactionById(
         userId: Long,
         transactionId: Long

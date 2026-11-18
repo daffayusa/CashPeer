@@ -1,8 +1,8 @@
-
 package com.example.cashpeer.feature.statistics.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cashpeer.feature.category.domain.model.Category
 import com.example.cashpeer.feature.category.domain.usecase.GetCategoryUseCase
 import com.example.cashpeer.feature.savinggoal.domain.model.SavingGoal
 import com.example.cashpeer.feature.savinggoal.domain.usecase.ObserveSavingGoalUseCase
@@ -32,21 +32,21 @@ class StatisticsViewModel @Inject constructor(
     private val selectedMonth = MutableStateFlow(YearMonth.now())
 
     private val transactions = getTransactionsUseCase(USER_ID)
-    private val categories = getCategoryUseCase(
-        USER_ID,
-        TransactionType.EXPENSE
-    )
+    private val expenseCategoriesFlow = getCategoryUseCase(USER_ID, TransactionType.EXPENSE)
+    private val incomeCategoriesFlow = getCategoryUseCase(USER_ID, TransactionType.INCOME)
     private val savingGoals = observeSavingGoalUseCase(USER_ID)
 
     val uiState = combine(
         transactions,
-        categories,
+        expenseCategoriesFlow,
+        incomeCategoriesFlow,
         savingGoals,
         selectedMonth
-    ) { transactionList, categoryList, goalList, month ->
+    ) { transactionList, expenseCategories, incomeCategories, goalList, month ->
         createUiState(
             transactions = transactionList,
-            categories = categoryList,
+            expenseCategoriesList = expenseCategories,
+            incomeCategoriesList = incomeCategories,
             goals = goalList,
             month = month
         )
@@ -74,7 +74,8 @@ class StatisticsViewModel @Inject constructor(
 
     private fun createUiState(
         transactions: List<Transaction>,
-        categories: List<com.example.cashpeer.feature.category.domain.model.Category>,
+        expenseCategoriesList: List<Category>,
+        incomeCategoriesList: List<Category>,
         goals: List<SavingGoal>,
         month: YearMonth
     ): StatisticsUiState {
@@ -116,9 +117,8 @@ class StatisticsViewModel @Inject constructor(
             0f
         }
 
-        val categoryNames = categories.associate {
-            it.id to it.name
-        }
+        val expenseCategoryNames = expenseCategoriesList.associate { it.id to it.name }
+        val incomeCategoryNames = incomeCategoriesList.associate { it.id to it.name }
 
         val expenseCategories = monthTransactions
             .filter {
@@ -131,12 +131,36 @@ class StatisticsViewModel @Inject constructor(
 
                 ExpenseCategoryUi(
                     categoryId = categoryId,
-                    categoryName = categoryNames[categoryId]
-                        ?: "Kategori lainnya",
+                    categoryName = expenseCategoryNames[categoryId] ?: "Lainnya",
                     amount = amount,
                     percentage = if (expense > 0L) {
                         amount.toDouble()
                             .div(expense.toDouble())
+                            .times(100.0)
+                            .toFloat()
+                    } else {
+                        0f
+                    }
+                )
+            }
+            .sortedByDescending { it.amount }
+
+        val incomeCategories = monthTransactions
+            .filter {
+                it.type == TransactionType.INCOME &&
+                        it.categoryId != null
+            }
+            .groupBy { it.categoryId!! }
+            .map { (categoryId, items) ->
+                val amount = items.sumOf { it.amount }
+
+                ExpenseCategoryUi(
+                    categoryId = categoryId,
+                    categoryName = incomeCategoryNames[categoryId] ?: "Lainnya",
+                    amount = amount,
+                    percentage = if (income > 0L) {
+                        amount.toDouble()
+                            .div(income.toDouble())
                             .times(100.0)
                             .toFloat()
                     } else {
@@ -197,6 +221,7 @@ class StatisticsViewModel @Inject constructor(
             remainingAmount = remainingAmount,
             highestExpenseCategory = expenseCategories.firstOrNull(),
             expenseCategories = expenseCategories,
+            incomeCategories = incomeCategories,
             monthlyTrends = monthlyTrends,
             savingGoals = savingGoalProgress,
             isLoading = false

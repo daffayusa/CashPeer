@@ -1,5 +1,6 @@
 package com.example.cashpeer.feature.home.presentation
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cashpeer.feature.category.domain.repository.CategoryRepository
@@ -8,6 +9,7 @@ import com.example.cashpeer.feature.transaction.domain.model.TransactionType
 import com.example.cashpeer.feature.transaction.domain.repository.TransactionRepository
 import com.example.cashpeer.feature.savinggoal.domain.repository.SavingGoalRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -27,6 +29,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val transactionRepository: TransactionRepository,
     private val savingGoalRepository: SavingGoalRepository,
     private val categoryRepository: CategoryRepository
@@ -137,10 +140,17 @@ class HomeViewModel @Inject constructor(
                 val goals = values[5] as List<HomeSavingGoalUi>
                 val categories = values[6] as Map<Long, String>
 
+                val savedUserName = context.getSharedPreferences("cashpeer_prefs", Context.MODE_PRIVATE)
+                    .getString("user_name", "") ?: ""
+                val savedBudget = context.getSharedPreferences("cashpeer_prefs", Context.MODE_PRIVATE)
+                    .getLong("monthly_budget", 0L)
+
                 HomeUiState(
+                    userName = savedUserName,
                     totalBalance = income - expense - saving,
                     monthlyIncome = monthly.second,
                     monthlyExpense = monthly.third,
+                    monthlyBudget = savedBudget,
                     monthLabel = monthly.first.format(
                         DateTimeFormatter.ofPattern(
                             "MMMM yyyy",
@@ -195,6 +205,14 @@ class HomeViewModel @Inject constructor(
                 _uiState.value = state
             }
         }
+    }
+
+    fun setMonthlyBudget(budget: Long) {
+        context.getSharedPreferences("cashpeer_prefs", Context.MODE_PRIVATE)
+            .edit()
+            .putLong("monthly_budget", budget)
+            .apply()
+        _uiState.update { it.copy(monthlyBudget = budget) }
     }
 
     fun previousMonth() {

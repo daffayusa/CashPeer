@@ -37,6 +37,20 @@ interface SavingGoalDao {
         goalId: Long
     ): SavingGoalEntity?
 
+    @Query(
+        """
+        SELECT *
+        FROM saving_goals
+        WHERE id = :goalId
+          AND user_id = :userId
+        LIMIT 1
+        """
+    )
+    fun observeSavingGoalById(
+        userId: Long,
+        goalId: Long
+    ): Flow<SavingGoalEntity?>
+
     @Insert
     suspend fun insert(
         savingGoal: SavingGoalEntity

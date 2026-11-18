@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cashpeer.core.ui.components.CpRupiahTextField
 import com.example.cashpeer.feature.savinggoal.domain.model.SavingFrequency
 import java.time.Instant
 import java.time.LocalDate
@@ -129,14 +130,11 @@ fun SavingGoalFormScreen(
                         enabled = !uiState.isSaving
                     )
 
-                    OutlinedTextField(
+                    CpRupiahTextField(
                         value = uiState.targetAmount,
                         onValueChange = viewModel::onTargetAmountChange,
-                        label = { Text("Nominal target (Rp)") },
-                        placeholder = { Text("Contoh: 5000000") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth(),
+                        label = "Nominal target",
+                        placeholder = "0",
                         enabled = !uiState.isSaving
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -161,19 +159,16 @@ fun SavingGoalFormScreen(
                             }
                         }
                     }
-                    OutlinedTextField(
+                    CpRupiahTextField(
                         value = uiState.savingAmount,
                         onValueChange = viewModel::onSavingAmountChange,
-                        label = { Text("Nominal tabungan rutin (Rp)") },
-                        placeholder = { Text("Contoh: 50000") },
+                        label = "Nominal tabungan rutin",
+                        placeholder = "0",
                         supportingText = {
                             Text(
                                 "Nominal yang akan kamu sisihkan ${uiState.savingFrequency.label.lowercase()}."
                             )
                         },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.fillMaxWidth(),
                         enabled = !uiState.isSaving
                     )
 

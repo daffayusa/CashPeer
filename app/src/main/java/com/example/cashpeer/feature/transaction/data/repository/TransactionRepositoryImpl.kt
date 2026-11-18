@@ -85,6 +85,20 @@ class TransactionRepositoryImpl @Inject constructor(
         )
     }
 
+    override fun observeTransactionsBySavingGoal(
+        userId: Long,
+        goalId: Long
+    ): Flow<List<Transaction>> {
+        return transactionDao
+            .observeTransactionsBySavingGoal(
+                userId = userId,
+                goalId = goalId
+            )
+            .map { entities ->
+                entities.map { it.toDomain() }
+            }
+    }
+
     override suspend fun getTransactionById(
         userId: Long,
         transactionId: Long
